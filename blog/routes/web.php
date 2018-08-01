@@ -12,10 +12,30 @@
 */
 
 Route::get('/', function () {
-    //return view('welcome');
     return redirect('login');
 });
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index');
+
+
+//Route::get('/manager', 'Auth\LoginController@redirectTo');
+
+Route::get('/manager', 'Auth\LoginController@roleManager');
+
+Route::get('/user', 'Auth\LoginController@roleUser');
+
+Route::post('/success', 'Auth\LoginController@success');
+
+
+
+/*
+Route::get('/manager', function () {
+
+    // return view('manager', compact('user'));
+    return view('manager');
+
+})->middleware('auth');*/
+
+
