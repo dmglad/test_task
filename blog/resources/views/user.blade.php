@@ -6,7 +6,7 @@
 
     <hr/>
 
-    {!! Form::open(['url' => 'success']) !!}
+    {!! Form::open(['url' => 'success', 'files' => 'true']) !!}
 
 
     <div>
@@ -40,6 +40,16 @@
         {!! Form::label('email', 'Email:') !!}
         <br>
         {!! Form::text('email') !!}
+        {!! Form::hidden('remember_token', $remember_token) !!}
+
+    </div>
+
+    <br>
+
+    <div>
+        {!! Form::label('attached_file', 'Select file to upload (max 2Mb):') !!}
+        <br>
+        {!! Form::file('attached_file') !!}
     </div>
 
     <br>

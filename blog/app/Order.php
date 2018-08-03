@@ -13,6 +13,10 @@ class Order extends Model
 
         'client',
 
-        'email'
+        'email',
+
+        'attached_file',
+
+        'remember_token'
     ];
 }

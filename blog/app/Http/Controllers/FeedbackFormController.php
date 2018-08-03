@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Order;
 use App\Http\Requests;
 use DB;
+use Carbon\Carbon;
+
 
 use Illuminate\Http\Request;
 
@@ -27,16 +29,36 @@ class FeedbackFormController extends Controller
         } else return redirect('home');
     }
 
+    public function managerCheckboxes(Requests\CreateCheckboxRequest $request)
+    {
+        if (Auth::user()->id == '1') {
+            $closedArray = $request->status;
+            if($closedArray != null) {
+                foreach ($closedArray as $closed) {
+                    Order::where('id', $closed)
+                        ->update(['status' => 'closed']);
+                }
+            }
+            return $this->roleManager();
+
+        } else return redirect('home');
+    }
 
     /**
-     * Check if user and return user page
+     * If user and if he hasn`t posted order in last 24 hours then redirects to user page
      *
      */
     public function roleUser()
     {
         if (Auth::user()->id != '1') {
-            return view('user');
-        }   else return redirect('home');
+            $remember_token = md5(Auth::user()->id . 'hash');
+            $orderTime = Order::where('remember_token', $remember_token)->orderBy('id', 'desc')->first();
+            if ($orderTime == '' || (Carbon::now()->timestamp - Carbon::parse($orderTime->created_at)->timestamp > 86400))
+            {
+                return view('user', compact('remember_token'));
+            }
+        }
+        return redirect('home');
     }
 
     /**
@@ -45,7 +67,39 @@ class FeedbackFormController extends Controller
      */
     public function success(Requests\CreateOrderRequest $request)
     {
-        Order::create($request->all());
+        $file = $request->file('attached_file');
+/*
+        //Display File Name
+        echo 'File Name: '.$file->getClientOriginalName();
+        echo '<br>';
+
+        //Display File Extension
+        echo 'File Extension: '.$file->getClientOriginalExtension();
+        echo '<br>';
+
+        //Display File Real Path
+        echo 'File Real Path: '.$file->getRealPath();
+        echo '<br>';
+
+        //Display File Size
+        echo 'File Size: '.$file->getSize();
+        echo '<br>';
+
+        //Display File Mime Type
+        echo 'File Mime Type: '.$file->getMimeType();
+*/
+
+        $lastUser = Order::create($request->all());
+
+        //Move Uploaded File
+        if($file != '' ) {
+            $destinationPath = public_path('uploads');
+            $file->move($destinationPath, $file->getClientOriginalName());
+
+
+            Order::where('id', $lastUser->id)
+                ->update(['attached_file' => $file->getClientOriginalName()]);
+        }
         return view('success');
     }
 }
