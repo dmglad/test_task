@@ -19,23 +19,10 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index');
 
+Route::get('/manager', 'FeedbackFormController@roleManager')->middleware('auth');
 
-//Route::get('/manager', 'Auth\LoginController@redirectTo');
+Route::get('/user', 'FeedbackFormController@roleUser')->middleware('auth');
 
-Route::get('/manager', 'Auth\LoginController@roleManager');
-
-Route::get('/user', 'Auth\LoginController@roleUser');
-
-Route::post('/success', 'Auth\LoginController@success');
-
-
-
-/*
-Route::get('/manager', function () {
-
-    // return view('manager', compact('user'));
-    return view('manager');
-
-})->middleware('auth');*/
+Route::post('/success', 'FeedbackFormController@success')->middleware('auth');
 
 
