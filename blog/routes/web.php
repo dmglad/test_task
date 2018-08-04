@@ -27,3 +27,5 @@ Route::post('/success', 'FeedbackFormController@success')->middleware('auth');
 
 Route::post('/manager', 'FeedbackFormController@managerCheckboxes')->middleware('auth');
 
+
+

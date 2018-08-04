@@ -11,6 +11,9 @@ use App\Order;
 use App\Http\Requests;
 use DB;
 use Carbon\Carbon;
+use Mail;
+//use App\Jobs\SendManagerEmail;
+use App\Mail\Reminder;
 
 
 use Illuminate\Http\Request;
@@ -53,7 +56,7 @@ class FeedbackFormController extends Controller
         if (Auth::user()->id != '1') {
             $remember_token = md5(Auth::user()->id . 'hash');
             $orderTime = Order::where('remember_token', $remember_token)->orderBy('id', 'desc')->first();
-            if ($orderTime == '' || (Carbon::now()->timestamp - Carbon::parse($orderTime->created_at)->timestamp > 86400))
+            if ($orderTime == '' || (Carbon::now()->timestamp - Carbon::parse($orderTime->created_at)->timestamp < 86400))
             {
                 return view('user', compact('remember_token'));
             }
@@ -92,6 +95,7 @@ class FeedbackFormController extends Controller
         $lastUser = Order::create($request->all());
 
         //Move Uploaded File
+        $addFile = 'not exists';
         if($file != '' ) {
             $destinationPath = public_path('uploads');
             $file->move($destinationPath, $file->getClientOriginalName());
@@ -99,7 +103,20 @@ class FeedbackFormController extends Controller
 
             Order::where('id', $lastUser->id)
                 ->update(['attached_file' => $file->getClientOriginalName()]);
+
+            $addFile = $destinationPath. '/' . $file->getClientOriginalName();
+            //$domain = request()->getHost();
+
+            //$email_content = 'Client: ' . $lastUser->client . '<br>Email: ' . $lastUser->email . '<br>Title: ' . $lastUser->title .
+              //  '<br>Body: ' . $lastUser->body . '<br>File: ' . $domain . '/uploads/' . $file->getClientOriginalName();
         }
+
+        $email_content = 'Client: ' . $lastUser->client . '<br>Email: ' . $lastUser->email .
+                '<br>Title: ' . $lastUser->title . '<br>Body: ' . $lastUser->body;
+
+        Mail::to('sciencetech@mail.ru')->queue(new Reminder($email_content, $addFile));
+
+
         return view('success');
     }
 }
