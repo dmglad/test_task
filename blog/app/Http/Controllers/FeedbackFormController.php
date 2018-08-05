@@ -56,7 +56,7 @@ class FeedbackFormController extends Controller
         if (Auth::user()->id != '1') {
             $remember_token = md5(Auth::user()->id . 'hash');
             $orderTime = Order::where('remember_token', $remember_token)->orderBy('id', 'desc')->first();
-            if ($orderTime == '' || (Carbon::now()->timestamp - Carbon::parse($orderTime->created_at)->timestamp < 86400))
+            if ($orderTime == '' || (Carbon::now()->timestamp - Carbon::parse($orderTime->created_at)->timestamp > 86400))
             {
                 return view('user', compact('remember_token'));
             }
